@@ -227,7 +227,6 @@ class _LoginPageState extends State<LoginPage> {
     if (get_response.statusCode == 200) {
       var decodedJson = json.decode(get_response.body);
       _todo = Todo.fromMap(decodedJson);
-      print(_todo.body[0].name);
     }
   }
 }

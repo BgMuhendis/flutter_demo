@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/loginPage.dart';
+import 'package:flutter_demo/pages/search.dart';
 import '../model/todoGet.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -73,7 +74,12 @@ class _HomePageState extends State<HomePage> {
         title: Text("Yapılacaklar"),
         actions: [
           IconButton(
-            onPressed: () => {},
+            onPressed: () {
+              showSearch(
+                context: context,
+                delegate: DataSearch(),
+              );
+            },
             icon: Icon(
               Icons.search_rounded,
               size: 20,
@@ -109,43 +115,45 @@ class _HomePageState extends State<HomePage> {
         child: FutureBuilder(
           future: getTodoControl(),
           builder: (context, AsyncSnapshot<Todo> snapshot) {
-            if (!snapshot.hasData) {
-              return Text("");
-            } else if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
-                child: CircularProgressIndicator(),
-              );
-            } else if (snapshot.connectionState == ConnectionState.done) {
-              return ListView.builder(
-                itemCount: snapshot.data.body.length,
-                itemBuilder: (context, index) {
-                  final String dateTime =
-                      snapshot.data.body[index].date.day.toString() +
-                          " " +
-                          season[snapshot.data.body[index].date.month - 1] +
-                          " " +
-                          snapshot.data.body[index].date.year.toString() +
-                          " " +
-                          snapshot.data.body[index].date.hour.toString() +
-                          ":" + 
-                          snapshot.data.body[index].date.minute.toString();
-                  return Card(
-                    child: ListTile(
-                      title: Text(snapshot.data.body[index].name),
-                      subtitle: Text(dateTime),
-                      trailing: IconButton(
-                        icon: Icon(
-                          Icons.delete,
-                          color: Colors.red,
+            if (snapshot.hasData) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              } else if (snapshot.connectionState == ConnectionState.done) {
+                return ListView.builder(
+                  itemCount: snapshot.data.body.length,
+                  itemBuilder: (context, index) {
+                    final String dateTime =
+                        snapshot.data.body[index].date.day.toString() +
+                            " " +
+                            season[snapshot.data.body[index].date.month - 1] +
+                            " " +
+                            snapshot.data.body[index].date.year.toString() +
+                            " " +
+                            snapshot.data.body[index].date.hour.toString() +
+                            ":" +
+                            snapshot.data.body[index].date.minute.toString();
+                    return Card(
+                      child: ListTile(
+                        title: Text(snapshot.data.body[index].name),
+                        subtitle: Text(dateTime),
+                        trailing: IconButton(
+                          icon: Icon(
+                            Icons.delete,
+                            color: Colors.red,
+                          ),
+                          onPressed: () {
+                            _deleteTodo(snapshot.data.body[index].id);
+                          },
                         ),
-                        onPressed: () {
-                          _deleteTodo(snapshot.data.body[index].id);
-                        },
                       ),
-                    ),
-                  );
-                },
-              );
+                    );
+                  },
+                );
+              }
+            } else if (!snapshot.hasData) {
+              return Text("");
             }
           },
         ),
